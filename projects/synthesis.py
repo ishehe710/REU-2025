@@ -1,77 +1,22 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d 
+from utils import rk2_data
 
 # data collectors
-'''
-    parameters
-        - y0 is the intial condition
-            - type: array of scalars
-        - n is the number of time steps
-            - type: integer
-        - f is a array of functions
-            - type: array of functions
-        - t0 is the inital time for the initial condition
-            - type: scalar
-        - tf is the final time 
-            - type: scalar
-        - params options paramters for the functions of f
-            - type: array of scalars
-'''
-def rk2_data(y0, n, f, t0, tf, params):
 
-    time_data = []
-    chart_data = []
-    
-    # generate list per axis
-    for i in range(len(f)):
-        chart_data.append([])
-    
-    y = np.array(y0)
-    t = t0
-    
-    # time step
-    dt = (tf-t0)/n
-    
-    
-    last_time = t
-    for _ in range(n):
 
-        # stage 1 of RK2 scheme
-        stage_1 = np.add(y , np.multiply(.5 * dt , rhs_function(y, t, params, f)))
-        
-        # stage 2 of RK2 scheme
-        y = np.add(y, np.multiply(dt , rhs_function(stage_1, t, params, f)))
-
-        
-        time_data.append(last_time)
-        last_time += dt
-        
-        for j in range(len(chart_data)):
-            chart_data[j].append(y[j])
-
-    chart_data.append(time_data)
-    return chart_data
-
-# rhs functions
-def rhs_function(vector, t, params, odes):
-    new_vector = []
-    
-    for i in range(len(vector)):
-        new_vector.append(odes[i](vector, t, params))
-    
-    return new_vector 
 
 def generate_axis(time_data, syn_time ,data):
     
     new_data = []
     time = []
     
-    '''
+    
     for i in range(len(time_data)):
         time_data[i] = round(time_data[i], 5)
         syn_time[i] = round(syn_time[i], 5)
-    '''
+    
     
     for j in range(len(time_data)):
         # print('t = ', time_data[j])
@@ -271,18 +216,18 @@ odes = [
 ]
 # params indecies
 # 0 = aphla, 1 = beta, 2 = epsilon, 3 = gamma, 4 = delta 
-params = [1, 2, .5, -.5, -.5]
-
+params1 = [1, 2, .5, -.5, -.5]
+params2 = [1, 2, .5,   1,   1]
 
 ###################################
 #   initial values (pronk gate)
 #     - (x1 = .8, x2 = -.5, x3 = 1.1, x4 = -.9)
 #     - (y1 = .3, y2 = -.4, y3 = .7,  y4 = -.2)
 
-
 condition1 = [.8, -.5, 1.1, -.9, .3, -.4,  .7, -.2]
 condition2 = [ 0,   0,   0,   0,  0,   0,   0,   0]
-data = rk2_data(condition1, 10000, odes, 0, 100, params)
+
+data = rk2_data(condition1, 10000, odes, 0, 100, params1)
 
 x_data = data[:4]
 time_data = data[-1]
@@ -317,30 +262,40 @@ plt.show()
 '''
 # synthesizing data
 
-
 time_data = np.array(time_data)
 
-new_time = time_data * 2
+
 x1 = data[0]
 
 
+# interpolating the data
+f = interp1d(time_data, x1)
 
-f = interp1d(time_data, data[0])
-
-
-new_time = time_data * .125
+new_time = time_data 
 
 
 new_x1 = f(new_time)
 
+print('len(new_time) = ', len(new_time))
+print('len(new_x1)   = ', len(new_x1))
+
+# new_time * .075
+syn_time = new_time * .075 + 3
+
+syn_t, syn_x1 = generate_axis(new_time, syn_time, new_x1)
+
+
+
+
+
 fig, ax = plt.subplots()
 
-ax.scatter(time_data, data[0], color='b' , s=10)
-ax.plot(new_time, new_x1, color='r')
+
+ax.plot(syn_t, syn_x1, label="synthesis")
 ax.set_xlabel('t')
 ax.set_ylabel('x1')
+ax.set_title('synthesis')
 plt.tight_layout()
 plt.show()
-
 
 
