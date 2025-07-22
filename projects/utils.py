@@ -3,7 +3,6 @@ import numpy as np
 
 
 
-
 # solver stuff
 def rk2(y0, n, f, t0, tf):
     y = y0
@@ -67,9 +66,61 @@ def rk2_data(y0, n, f, t0, tf, params):
     return chart_data
 
 def rhs_function(vector, t, params, odes):
+    
+    
     new_vector = []
     
     for i in range(len(vector)):
         new_vector.append(odes[i](vector, t, params))
     
     return new_vector 
+
+def generate_axis(time_data, syn_time ,data):
+    
+    new_data = []
+    time = []
+    
+    
+    for i in range(len(time_data)):
+        time_data[i] = round(time_data[i], 5)
+        syn_time[i] = round(syn_time[i], 5)
+    
+    
+    for j in range(len(time_data)):
+        # print('t = ', time_data[j])
+        if time_data[j] in syn_time:
+            new_data.append(data[j])
+            time.append(time_data[j])
+            #print(new_data)
+    
+    return (time, new_data)
+
+def parse_csv(filename):
+    file = open(filename)
+    
+    data = []
+    
+    for line in file:
+        # print(line)
+        if line[0] != '#':
+            components = line.split(',')
+            v = []
+            for c in components:
+                v.append(float(c))
+            # print('vector = ', v)
+            data.append(v)
+            # print('t = ', t)
+    return data
+
+def generate_lists(matrix_data):
+    
+    matrix = []
+    for _ in range(len(matrix_data[0])):
+        matrix.append([])
+    
+    for i in range(len(matrix_data)):
+        for j in range(len(matrix_data[i])):
+            component = matrix_data[i][j]
+            matrix[j].append(component)
+
+    return matrix
